@@ -1,2 +1,2 @@
 # UBC_FirstYear
-Collection of all codes written in my first year
+Collection of all codes written throughout my degree
