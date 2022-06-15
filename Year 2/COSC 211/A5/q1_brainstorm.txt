@@ -1,0 +1,37 @@
+		for (int i = 2; i < 100; i++) {
+#			if (isPrime(i) == 1)
+#				System.out.print(i + " ");
+#		}
+#	}
+#	public static int isPrime(int n) {		
+#		int prime = 1; 			
+#		for (int i = 2; i < n; i++) {
+#			if (n % i == 0)
+#				prime = 0; 		
+#		}
+#		return prime;
+#	}
+
+first for loop:
+li $t0 2		#i = 2
+li $t1 100		#total num of integers 100
+bge $t0 $t1 next  #if(i >= 100) branch
+
+
+if(isPrime(i) == 1)
+
+
+
+
+addi $t0 $t0 1	#i++
+j loop		#loop
+
+isPrime:
+li $t0 2	
+li $s1 1	
+bge $t0 $a0 next
+div $a0 $t0
+mfhi $t1
+
+
+		

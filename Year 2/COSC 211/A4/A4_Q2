@@ -1,0 +1,34 @@
+.data
+
+.align 4
+input: .space 5				#reserve 4 chars and 1 null terminator
+
+.text 
+
+li $v0, 8				#read string code for syscall
+la $a0, input				#address to save
+li $a1, 5				#how long it is
+syscall					#read it
+la $t0, input				#put address of input in t0
+lb $t1, ($t0) 				#load data of first digit into t1
+addi $t2, $t1, -48 			#t2 = t1 - 48 ('0'), converting from unicode to decimal
+mul $t3, $t2, 8				#converting binary to decimal
+add $s0, $s0, $t3 			#$s0 = $s0 + $t3
+lb $t1, 1($t0)				 #same as above but for 2nd digit
+addi $t2, $t1, -48 			
+mul $t3, $t2, 4				#multiply by 4 instead of 8 (2^2 instead of 2^3)
+add $s0, $s0, $t3 
+lb $t1, 2($t0)				 #same as above but for 3rd digit
+addi $t2, $t1, -48 			
+mul $t3, $t2, 2				#multiply by 2 instead of 4 (2^1 instead of 2^2)
+add $s0, $s0, $t3 
+lb $t1, 3($t0) 				# #same as above but for 4nd digit 
+addi $t2, $t1, -48
+mul $t3, $t2, 1 			#multiply by 1 instead of 2 
+add $s0, $s0, $t3
+li $v0, 11 				#print_char code for syscall	
+la $a0, '\n'				#print new line character 
+syscall					#print char
+li $v0, 1				#print_int syscall code
+la $a0,($s0)				#load address of input
+syscall					#print integer

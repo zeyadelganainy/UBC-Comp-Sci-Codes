@@ -1,0 +1,22 @@
+Q3)
+a. 0xAD100000
+
+sw $16 0($8) where $16 is rt, $8 is rs, and 0 is the offset. 
+Based on the I-format it wold look like this:
+1010	1101	0001	0000	0000 0000 0000 0000
+In hexadecimal that would be 0xAD100000
+
+b. 0001 00  10 000  1 0010  0000 0000 0000 0111
+     op   |   rs   |  rt  |        offset
+The offset is how many words ahead the label is from the instruction.
+Here, exit is 7 instructions ahead so the offset is 7 (0111 binary is 7).
+The equation for the offset is $pc + 4 + 4(offset) and when the condition
+is true the value of pc is updated with the above equation. Using that in
+this example gives $pc = $pc + 32 
+
+c. Because the absolute address is divided by 4 and address of loop is
+in 26 bits
+00100 0000 0000 0000 0001 1100
+divided by 4:
+00001 0000 0000 0000 0000 0111
+in hexadecimal that would be 0x08100007

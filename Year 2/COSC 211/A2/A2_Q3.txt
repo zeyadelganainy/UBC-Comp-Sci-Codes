@@ -1,0 +1,19 @@
+Q3)
+
+	add $t0, $s3, $s3		#t0 = 2 * s3
+	add $t0, $t0, $s2		#t0 = 2 * s3 + s2
+	addi $t1, $0, 5			#t1 = 5
+	mult $t0, $t1			#5(2s3 + s2) = 10s3 + 5s2
+	mflo $t0			#t0 = 10s3 + 5s2
+	addi $t1, $s2, 6		#t1 = s2 + 6
+	div $t0, $t1			#t0/t1 = (10s3 + 5s2) / (s2 + 6)
+	mflo $t0			#t0 = (10s3 + 5s2) / (s2 + 6)
+	mult $t0, $t0			#t0 * t0= pow((10s3 + 5s2) / (s2 + 6), 2)
+	mflo $t0			#t0 = pow((10s3 + 5s2) / (s2 + 6), 2)
+	sll $t1, $s4, 2			#t1 = s4 << 2
+	and $s0, $t0, $t1		#s0 = pow((10s3 + 5s2) / (s2 + 6), 2) & s4 << 2
+
+All the above MIPS code could be written as this C statement:
+s0 = pow((10s3 + 5s2) / (s2 + 6), 2) & s4 << 2
+
+ 

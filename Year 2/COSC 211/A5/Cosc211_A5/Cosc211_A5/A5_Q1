@@ -1,0 +1,81 @@
+#print(Enter an integer: );
+# int k=store integerer enter by user;
+#int n=2;
+
+#while(n<k){
+#int j=0
+#isPrime(n)
+# if(j==1){
+ #print(n+" ");
+#}
+#}
+
+#isPrime(int k){
+#int j=0;
+# for(int i=k-1;i>=2;i--){
+  # if (k%i==0){
+  #break;
+  #}
+#}
+  
+#if(i==2){
+#j=1;
+#}
+#else{
+#j=0;
+#}
+#return j
+#}
+
+
+
+
+.data
+ msg1: .asciiz "Enter an Integer: "
+ .text
+
+main:   li $t3 2   #t3=2
+        li $v0 4
+        la $a0 msg1 #print the message 
+        syscall 
+        li $v0 5     #read the integer 
+        syscall 
+       add $v1 $v0 $zero   
+      loop1: 
+      bgt  $v1 $t3 bye    
+         move $a0 $t3       #a0=t3
+        jal isPrime     #call prime 
+        beq $v0 $zero else  #if v0==0 then go to else 
+        move $a0 $t3      #print the int 
+        li $v0 1
+        syscall 
+        li $a0 ' '      #print space 
+        li $v0 11        
+        syscall
+        add $t3 $t3 1  #t3=t3+1 
+        j loop1        #loop again 
+        else: add $t3 $t3 1 #t3=t3+1
+           j loop1     #loop again 
+     bye: li $v0 10 
+           syscall
+          
+        
+        
+        
+  
+isPrime: 
+         li $t0 1      #t0=1
+         addi $t1 $a0 -1 #a0=a0-1
+      loop: beq $t1 $t0 next 
+         div $a0 $t1   #hi=a0%t1
+         mfhi $t2       #t2=a0%t1
+         beq $t2 $zero exit #if t2=0 then go to exit 
+         addi $t1 $t1 -1   #t1=t1-1
+         j loop      #loop back 
+         
+      next: li $v0 1  #return 1 
+            jr $ra 
+      exit: li $v0 0   #return 0 
+            jr $ra 
+         
+ 

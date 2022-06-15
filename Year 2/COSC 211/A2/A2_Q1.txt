@@ -1,0 +1,9 @@
+Q1.1) This program takes a string as input and returns the number of characters in that string.
+
+Q1.2) 	len:	1001 0000
+	buffer: 1001 0004
+	str:	1001 0010
+
+Q1.3) Yes, str would be 1001 000e instead of 1001 0010 because align 4 would mean that str would
+be aligned on a 2^4 or 16-byte boundary hence having more unused space and a larger address number.
+However, len and buffer would remain the same because align 4 would only affect the following line. 
