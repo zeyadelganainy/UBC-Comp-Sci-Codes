@@ -1,0 +1,73 @@
+#Question 1A
+dbinom(0,5,0.5)
+#[1] 0.03125 
+dbinom(1:5,5,0.5)
+#[1] 0.15625 0.31250 0.31250 0.15625 0.03125
+
+#Question 1B
+x <- dbinom(1:5,5,0.5)
+names(x) <- 1:5
+barplot(x)
+
+#Question 2A
+barbinom <- function(n,p){
+  prob <- dbinom(0:n,n,p)
+  names(prob) <- 0:n
+  barplot(prob)
+}
+
+#Question 2B
+barbinom(7, 1/6)
+
+#Question 3A
+dgeom(6,1/6)
+#[1] 0.05581633
+
+#Question 3B
+dgeom(4,1/3)
+#[1] 0.06584362
+
+#Question 3C
+dgeom(10, 1/3)
+# [1] 0.00578051
+
+#Question 4A
+bargeom <- function(p){
+  Px <- dgeom(0:10,p)
+  names(Px) <- 0:10
+  barplot(Px)
+}
+
+#Question 4B
+bargeom(1/6)
+
+#Question 4C
+bargeom(1/3)
+
+#Question 4D
+bargeom(1/2)
+
+#Question 5A
+dmaxgeom <- function(x,p){
+  2*p*(1-p)^x + (1-p)^(2*x+2) - (1-p)^(2*x)
+}
+
+#Question 5B
+dmaxgeom(5,1/6)
+#[1] 0.08461026
+
+#Question 6A
+barmaxgeom <- function(p) {
+  Px <- dmaxgeom(0:15,p)
+  names(Px) <- 0:15
+  barplot(Px)
+}
+
+#Question 6B
+barmaxgeom(1/6)
+
+#Question 6C
+barmaxgeom(1/3)
+
+#Question 6D
+barmaxgeom(1/2)

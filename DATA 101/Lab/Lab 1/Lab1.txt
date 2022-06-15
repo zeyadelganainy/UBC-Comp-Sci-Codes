@@ -1,0 +1,44 @@
+> intRate <- 0.01
+> n <- 10
+> principal <- 1500
+> payment <- principal * intRate / (1- (1 + intRate)^(-n))
+> payment
+[1] 158.3731
+.
+.
+.
+> principal <- 200000
+> intRate <- 0.003
+> n <- 300
+> payment <- principal * intRate / (1 - (1+intRate)^(-n))
+> payment
+[1] 1012.005
+.
+.
+.
+> r <- 6378
+> volumeEarth <- (4/3)*pi*(r)^3
+> volumeEarth
+[1] 1.086781e+12
+.
+.
+.
+> 31079%%170166719
+[1] 31079
+.
+.
+.
+> intRate <- 0.03
+> n <- 5
+> principal <- 2000
+> payment <- principal * intRate / (1-(1+intRate)^(-n))
+> payment
+[1] 436.7091
+.
+.
+.
+> intEarned <- principal*intRate*1:30
+> intEarned
+ [1]   60  120  180  240  300  360  420  480  540  600
+[11]  660  720  780  840  900  960 1020 1080 1140 1200
+[21] 1260 1320 1380 1440 1500 1560 1620 1680 1740 1800

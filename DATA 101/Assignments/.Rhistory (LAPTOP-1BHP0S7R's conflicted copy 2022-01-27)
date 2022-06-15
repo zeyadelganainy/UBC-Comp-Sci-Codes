@@ -1,0 +1,512 @@
+# dataframe vector for results
+seed <- character(0)
+intercept <- numeric(0)
+slope <- numeric(0)
+for (i in 1:n){
+tree_model <- lm(height~age, data_split[[i]])
+seed <- c(seed, seeds[i])
+intercept <- c(intercept, tree_model$coefficients[1])
+slope <- c(slope, tree_model$coefficients[2])
+}
+trees <- data.frame("Seed" = seed, "Intercept" = intercept, "Slope" = slope)
+trees # dataframe containing slopes and intercepts for each seed
+mean(coef(lm(trees$Slope ~ trees$Intercept))[1])
+mean(coef(lm(trees$Slope ~ trees$Intercept))[2])
+#Question 1
+#The code for hornerpoly is as follows:
+hornerpoly <- function(x,a){
+# a is a coefficients vector starting with c1
+n<-length(a)
+p<-a[n]
+for (i in (n-1):1){
+p<- p*x + a[i]
+}
+return(p)
+}
+#If we were to use this function to write another one to evalute sin(x) we can
+#use the essential idea of it and adjust it to our problem:
+#the formula would be: x^(1)/factorial(1) + x^(3)/factorial(3) where for all the odd
+#numbers from 1 to m, but we see that the pattern is - + - + - +, to adjust to
+#that, we will want to multiply the numerator by -1^0 then increment the degree
+#with each addition, ex: (-1)^0 = 1 then (-1)^1 = -1 and so on, so our new formula is
+#(-1)^(i-1) * x^(2*i-1)/ factorial(2*i - 1) for m number of times:
+sintaylor <- function(x,m) {
+p <- 0 #equivalent to p <- a[n] from hornerpoly (initializing p to a value)
+for (i in 1:m){
+p <- p + (-1)^(i-1) * x^(2*i-1)/ factorial(2*i - 1) #equivalent to p <- p*x + a[i]
+}
+return(p)
+}
+#Checking:
+sintaylor(5,9)
+#[1] -0.9587764
+sintaylor(5,10)
+#[1] -0.9589332
+#The true value of sin(5) in radians is -0.9589242 and as m increased we got closer to the actual value
+#In some cases, the two answers are almost the same:
+sintaylor(pi/2,9)
+#[1] 1
+sintaylor(pi/2,10)
+#[1] 1
+#In others, it takes a large m to reach true value:
+sintaylor(10,9)
+#[1] 65.3945
+sintaylor(10,10)
+#[1] -16.81185
+#The actual value of sin(10) is -0.5440211, the function isnt wrong but it takes a higher value of m to reach:
+sintaylor(10,19)
+#[1] -0.5440211
+#------------------------------------------------------------------------------
+#Question 2
+library(lattice)
+CanPop <- data.frame(read.csv("population.csv")[c(1,2,13)])
+names(CanPop) <- c("Year","Province","Pop")
+CanPop$Year <- as.character(CanPop$Year)
+dotplot(Province ~ Pop|Year, data = CanPop)
+#------------------------------------------------------------------------------
+#Question 3A
+CanMurders <- data.frame(read.csv("murders.csv")[c(1,2,11)])
+names(CanMurders) <- c("Year","Province","Murders")
+#Question 3B
+CanMurders$Year <- as.character(CanMurders$Year)
+dotplot(Province ~ Murders|Year, data = CanMurders)
+dotplot(Year ~ Murders, data = CanMurders)
+#Question 3C
+CanMurders$MurdersPerCapita <- with(c(CanMurders,CanPop), Murders / Pop * 100000 )
+dotplot(Province ~ MurdersPerCapita|Year, data = CanMurders)
+dotplot(Year ~ Murders, data = CanMurders)
+#The question asked for murders for each year but since I already did that in 3B
+#I decided to add MurdersPerCapita for each year
+dotplot(Year ~ MurdersPerCapita, data = CanMurders)
+#Question 3D
+MurdersPerYear <- numeric(3)
+for(i in 1:3){
+MurdersPerYear[i] <- sum(subset(CanMurders$Murders, CanMurders$Year == 2016+i))
+}
+MPCPerYear <- numeric(3)
+for(i in 1:3){
+MPCPerYear[i] <- sum(subset(CanMurders, CanMurders$Year == 2016+i)[,4])
+}
+SumMurders <- data.frame(unique(CanMurders$Year),MurdersPerYear[1:3],MPCPerYear[1:3])
+names(SumMurders) <- c("Year","Murders","MurdersPerCapita")
+dotplot(Year ~ Murders, data = SumMurders)
+dotplot(Year ~ MurdersPerCapita, data = SumMurders)
+#Question 3E
+par(mfrow=c(1,2))
+barplot(subset(CanMurders$Murders, CanMurders$Year == 2017),
+names.arg = unique(CanPop$Province), las = 2, cex.names = .35)
+barplot(subset(CanMurders$MurdersPerCapita, CanMurders$Year == 2017),
+names.arg = unique(CanPop$Province), las = 2, cex.names = .35)
+#Question 3F
+#For 2018
+barplot(subset(CanMurders$Murders, CanMurders$Year == 2018),
+names.arg = unique(CanPop$Province), las = 2, cex.names = .35, col = "darkslategrey")
+barplot(subset(CanMurders$MurdersPerCapita, CanMurders$Year == 2018),
+names.arg = unique(CanPop$Province), las = 2, cex.names = .35, col = "aquamarine3")
+#For 2019
+barplot(subset(CanMurders$Murders, CanMurders$Year == 2019),
+names.arg = unique(CanPop$Province), las = 2, cex.names = .35, col = "cornflowerblue")
+barplot(subset(CanMurders$MurdersPerCapita, CanMurders$Year == 2019),
+names.arg = unique(CanPop$Province), las = 2, cex.names = .35, col = "deepskyblue3")
+#Question 3G
+Can17 <- subset(CanMurders$MurdersPerCapita, CanMurders$Year == 2017)
+Can18 <- subset(CanMurders$MurdersPerCapita, CanMurders$Year == 2018)
+Can19 <- subset(CanMurders$MurdersPerCapita, CanMurders$Year == 2019)
+CanHomicides <- cbind(Can17,Can18,Can19)
+colnames(CanHomicides) <- 2017:2019
+par(mfrow=c(1,3))
+for(i in 2017:2019){
+barplot(subset(CanMurders$MurdersPerCapita, CanMurders$Year == i),
+names.arg = unique(CanMurders$Province), cex.names = 0.45, las = 2, font = 2,col = i)
+}
+#------------------------------------------------------------------------------
+#Question 4A
+source("radon-1.R")
+library(MPV)
+regression1.lm <-lm(measurement ~ diameter, data = radon)
+PRESS(regression1.lm)
+#[1] 266.6634
+#Question 4B
+regression2.lm <- lm(measurement ~ diameter + time, data = radon)
+PRESS(regression2.lm)
+#[1] 151.6716
+#regression2.lm is better since small values of PRESS are desired
+#Question 4C
+predict(regression2.lm, newdata = data.frame(diameter =0.9, time = 1),
+interval = "predict")
+#       fit      lwr      upr
+#1 70.73473 65.61045 75.85902
+#Prediction is 70.7 and 95% prediction interval is between 65.61 and 75.86
+predict(regression2.lm, newdata = data.frame(diameter =0.9, time = 4),
+interval = "predict")
+#      fit      lwr      upr
+#1 76.38473 71.26045 81.50902
+#Prediction is 76.4 and 95% prediction interval is between 71.26 and 81.51
+#------------------------------------------------------------------------------
+#Question 5
+source("mousetumours.R")
+xyplot(volume ~ time|as.character(mouse), data = mousetumours, type = c("p","smooth"))
+#------------------------------------------------------------------------------
+#Question 6
+help(table.b4)
+#y is sales price ($1000s)
+#x1 is taxes ($1000s)
+#x2 is number of baths
+#x3 is lot size (1000s ft^2)
+#x4 is living space (1000s ft^2)
+#x5 is number of garage stalls
+#x6 is number of rooms
+#x7 is number of bedrooms
+#x8 is age of the home (years)
+#x9 is number of fireplaces
+model1.lm <- lm(y ~ ., data = table.b4)
+PRESS(model1.lm)
+#[1] 393.492
+model2.lm <- lm(y ~ x1, data = table.b4)
+PRESS(model2.lm)
+#[1] 224.6111
+model3.lm <- lm(y ~ x1 + x8, data = table.b4)
+PRESS(model3.lm)
+#[1] 253.9058
+model4.lm <- lm(y ~ x1 + x2, data = table.b4)
+PRESS(model4.lm)
+#[1] 224.441
+model5.lm <- lm(y ~ x1 + x5, data = table.b4)
+PRESS(model5.lm)
+#[1] 236.814
+model6.lm <- lm(y ~ x2 + x3 + x5 + x8, data = table.b4)
+PRESS(model6.lm)
+#[1] 331.0418
+model7.lm <- lm(y ~ x2 + x3 + x5, data = table.b4)
+PRESS(model7.lm)
+#[1] 374.1862
+model8.lm <- lm(y ~ x2 + x3 + x5 + x9, data = table.b4)
+PRESS(model8.lm)
+#[1] 422.3961
+models <- c(393.492,224.6111,253.9058,224.441,236.814,331.0418,374.1862,422.3961)
+min(models)
+#[1] 224.441
+#This number corresponds to model4, so that is the best model out of all of them
+#If we didn't have information about taxes (x1), the best aspects to look at would be
+#between models 6 to 8 with PRESS values of 331.0418, 374.1862 and 422.3961 respectively
+#The lowest value is that of model5, so the best aspects are:
+#number of baths (x2), lot size (x3), number of garage stalls (x5), and age of home (x8)
+#The predictive model for that would be:
+coef(model6.lm)
+#(Intercept)          x2          x3          x5          x8
+# 14.5836728  12.5126817   0.9217315   2.7801968  -0.1008803
+#So it's:
+#y = 14.6 + 12.5(x2) + 0.9(x3) + 2.8(x5) + -0.1(x8)
+for(i in 2017:2019){
+barplot(subset(CanMurders$MurdersPerCapita, CanMurders$Year == i),
+names.arg = unique(CanMurders$Province), cex.names = 0.45, las = 2, font = 2,col = i)
+}
+#Question 1
+#The code for hornerpoly is as follows:
+hornerpoly <- function(x,a){
+# a is a coefficients vector starting with c1
+n<-length(a)
+p<-a[n]
+for (i in (n-1):1){
+p<- p*x + a[i]
+}
+return(p)
+}
+#If we were to use this function to write another one to evalute sin(x) we can
+#use the essential idea of it and adjust it to our problem:
+#the formula would be: x^(1)/factorial(1) + x^(3)/factorial(3) where for all the odd
+#numbers from 1 to m, but we see that the pattern is - + - + - +, to adjust to
+#that, we will want to multiply the numerator by -1^0 then increment the degree
+#with each addition, ex: (-1)^0 = 1 then (-1)^1 = -1 and so on, so our new formula is
+#(-1)^(i-1) * x^(2*i-1)/ factorial(2*i - 1) for m number of times:
+sintaylor <- function(x,m) {
+p <- 0 #equivalent to p <- a[n] from hornerpoly (initializing p to a value)
+for (i in 1:m){
+p <- p + (-1)^(i-1) * x^(2*i-1)/ factorial(2*i - 1) #equivalent to p <- p*x + a[i]
+}
+return(p)
+}
+#Checking:
+sintaylor(5,9)
+#[1] -0.9587764
+sintaylor(5,10)
+#[1] -0.9589332
+#The true value of sin(5) in radians is -0.9589242 and as m increased we got closer to the actual value
+#In some cases, the two answers are almost the same:
+sintaylor(pi/2,9)
+#[1] 1
+sintaylor(pi/2,10)
+#[1] 1
+#In others, it takes a large m to reach true value:
+sintaylor(10,9)
+#[1] 65.3945
+sintaylor(10,10)
+#[1] -16.81185
+#The actual value of sin(10) is -0.5440211, the function isnt wrong but it takes a higher value of m to reach:
+sintaylor(10,19)
+#[1] -0.5440211
+#------------------------------------------------------------------------------
+#Question 2
+library(lattice)
+CanPop <- data.frame(read.csv("population.csv")[c(1,2,13)])
+names(CanPop) <- c("Year","Province","Pop")
+CanPop$Year <- as.character(CanPop$Year)
+dotplot(Province ~ Pop|Year, data = CanPop)
+#------------------------------------------------------------------------------
+#Question 3A
+CanMurders <- data.frame(read.csv("murders.csv")[c(1,2,11)])
+names(CanMurders) <- c("Year","Province","Murders")
+#Question 3B
+CanMurders$Year <- as.character(CanMurders$Year)
+dotplot(Province ~ Murders|Year, data = CanMurders)
+dotplot(Year ~ Murders, data = CanMurders)
+#Question 3C
+CanMurders$MurdersPerCapita <- with(c(CanMurders,CanPop), Murders / Pop * 100000 )
+dotplot(Province ~ MurdersPerCapita|Year, data = CanMurders)
+dotplot(Year ~ Murders, data = CanMurders)
+#The question asked for murders for each year but since I already did that in 3B
+#I decided to add MurdersPerCapita for each year
+dotplot(Year ~ MurdersPerCapita, data = CanMurders)
+#Question 3D
+MurdersPerYear <- numeric(3)
+for(i in 1:3){
+MurdersPerYear[i] <- sum(subset(CanMurders$Murders, CanMurders$Year == 2016+i))
+}
+MPCPerYear <- numeric(3)
+for(i in 1:3){
+MPCPerYear[i] <- sum(subset(CanMurders, CanMurders$Year == 2016+i)[,4])
+}
+SumMurders <- data.frame(unique(CanMurders$Year),MurdersPerYear[1:3],MPCPerYear[1:3])
+names(SumMurders) <- c("Year","Murders","MurdersPerCapita")
+dotplot(Year ~ Murders, data = SumMurders)
+dotplot(Year ~ MurdersPerCapita, data = SumMurders)
+#Question 3E
+par(mfrow=c(1,2))
+barplot(subset(CanMurders$Murders, CanMurders$Year == 2017),
+names.arg = unique(CanPop$Province), las = 2, cex.names = .35)
+barplot(subset(CanMurders$MurdersPerCapita, CanMurders$Year == 2017),
+names.arg = unique(CanPop$Province), las = 2, cex.names = .35)
+#Question 3F
+#For 2018
+barplot(subset(CanMurders$Murders, CanMurders$Year == 2018),
+names.arg = unique(CanPop$Province), las = 2, cex.names = .35, col = "darkslategrey")
+barplot(subset(CanMurders$MurdersPerCapita, CanMurders$Year == 2018),
+names.arg = unique(CanPop$Province), las = 2, cex.names = .35, col = "aquamarine3")
+#For 2019
+barplot(subset(CanMurders$Murders, CanMurders$Year == 2019),
+names.arg = unique(CanPop$Province), las = 2, cex.names = .35, col = "cornflowerblue")
+barplot(subset(CanMurders$MurdersPerCapita, CanMurders$Year == 2019),
+names.arg = unique(CanPop$Province), las = 2, cex.names = .35, col = "deepskyblue3")
+#Question 3G
+Can17 <- subset(CanMurders$MurdersPerCapita, CanMurders$Year == 2017)
+Can18 <- subset(CanMurders$MurdersPerCapita, CanMurders$Year == 2018)
+Can19 <- subset(CanMurders$MurdersPerCapita, CanMurders$Year == 2019)
+CanHomicides <- cbind(Can17,Can18,Can19)
+colnames(CanHomicides) <- 2017:2019
+par(mfrow=c(1,3))
+for(i in 2017:2019){
+barplot(subset(CanMurders$MurdersPerCapita, CanMurders$Year == i),
+names.arg = unique(CanMurders$Province), cex.names = 0.45, las = 2, font = 2,col = i)
+}
+#------------------------------------------------------------------------------
+#Question 4A
+source("radon-1.R")
+library(MPV)
+regression1.lm <-lm(measurement ~ diameter, data = radon)
+PRESS(regression1.lm)
+#[1] 266.6634
+#Question 4B
+regression2.lm <- lm(measurement ~ diameter + time, data = radon)
+PRESS(regression2.lm)
+#[1] 151.6716
+#regression2.lm is better since small values of PRESS are desired
+#Question 4C
+predict(regression2.lm, newdata = data.frame(diameter =0.9, time = 1),
+interval = "predict")
+#       fit      lwr      upr
+#1 70.73473 65.61045 75.85902
+#Prediction is 70.7 and 95% prediction interval is between 65.61 and 75.86
+predict(regression2.lm, newdata = data.frame(diameter =0.9, time = 4),
+interval = "predict")
+#      fit      lwr      upr
+#1 76.38473 71.26045 81.50902
+#Prediction is 76.4 and 95% prediction interval is between 71.26 and 81.51
+#------------------------------------------------------------------------------
+#Question 5
+source("mousetumours.R")
+xyplot(volume ~ time|as.character(mouse), data = mousetumours, type = c("p","smooth"))
+#------------------------------------------------------------------------------
+#Question 6
+help(table.b4)
+#y is sales price ($1000s)
+#x1 is taxes ($1000s)
+#x2 is number of baths
+#x3 is lot size (1000s ft^2)
+#x4 is living space (1000s ft^2)
+#x5 is number of garage stalls
+#x6 is number of rooms
+#x7 is number of bedrooms
+#x8 is age of the home (years)
+#x9 is number of fireplaces
+model1.lm <- lm(y ~ ., data = table.b4)
+PRESS(model1.lm)
+#[1] 393.492
+model2.lm <- lm(y ~ x1, data = table.b4)
+PRESS(model2.lm)
+#[1] 224.6111
+model3.lm <- lm(y ~ x1 + x8, data = table.b4)
+PRESS(model3.lm)
+#[1] 253.9058
+model4.lm <- lm(y ~ x1 + x2, data = table.b4)
+PRESS(model4.lm)
+#[1] 224.441
+model5.lm <- lm(y ~ x1 + x5, data = table.b4)
+PRESS(model5.lm)
+#[1] 236.814
+model6.lm <- lm(y ~ x2 + x3 + x5 + x8, data = table.b4)
+PRESS(model6.lm)
+#[1] 331.0418
+model7.lm <- lm(y ~ x2 + x3 + x5, data = table.b4)
+PRESS(model7.lm)
+#[1] 374.1862
+model8.lm <- lm(y ~ x2 + x3 + x5 + x9, data = table.b4)
+PRESS(model8.lm)
+#[1] 422.3961
+models <- c(393.492,224.6111,253.9058,224.441,236.814,331.0418,374.1862,422.3961)
+min(models)
+#[1] 224.441
+#This number corresponds to model4, so that is the best model out of all of them
+#If we didn't have information about taxes (x1), the best aspects to look at would be
+#between models 6 to 8 with PRESS values of 331.0418, 374.1862 and 422.3961 respectively
+#The lowest value is that of model5, so the best aspects are:
+#number of baths (x2), lot size (x3), number of garage stalls (x5), and age of home (x8)
+#The predictive model for that would be:
+coef(model6.lm)
+#(Intercept)          x2          x3          x5          x8
+# 14.5836728  12.5126817   0.9217315   2.7801968  -0.1008803
+#So it's:
+#y = 14.6 + 12.5(x2) + 0.9(x3) + 2.8(x5) + -0.1(x8)
+#Question 1
+# A
+chickwts[14,]
+#   weight    feed
+#14    141 linseed
+# B
+chickwts[c(7,14,37),1]
+#[1] 108 141 423
+# C
+chickwtsCasein <- subset(chickwts, feed == "casein")
+#Extracted the observations that correspond to casein, and assigned the subset to chickwtsCasein.
+# D
+mean(chickwtsCasein$weight)
+#[1] 323.5833
+# E
+chickwts$Feed <- chickwts[,2]
+levels(chickwts$Feed) <- c("Casein","Horsebean","Linseed","Meatmeal","Soybean","Sunflower")
+#Create a new column which contains a factor called Feed which has levels Casein,and so on.
+# F
+chick240 <- subset(chickwts, chickwts$weight < 240)
+#Extracted all observations where weight is less than 240 and put them in chick240.
+# G
+chick240Table <- table(chick240$feed)
+barplot(chick240Table)
+#Created a bar plot of the counts in chick240Table.
+--------------------------------------------------------------------------------------------------
+#Question 2
+# A
+install.packages("DAAG")
+library(DAAG)
+nrow(cuckoos)
+#[1] 120, so it's 120 observations
+# B
+cuckoos$length[27]
+#[1] 22, so the length is 22
+# C
+cuckoos[40,]
+#length breadth      species id
+#40   22.9    17.2 meadow.pipit 60
+# D
+levels(cuckoos$species)
+#[1] "hedge.sparrow" "meadow.pipit"  "pied.wagtail"  "robin"
+#[5] "tree.pipit"    "wren"
+# E
+m.pipitFactor <- factor(cuckoos$species)
+levels(m.pipitFactor) <- c("meadow.pipit","other","other","other","other","other")
+which(cuckoos$species == "meadow.pipit")
+m.pipitFactor[1:45] <- "meadow.pipit"
+m.pipitFactor[46:120] <- "other"
+#Created a new factor called m.pipitFactor which has levels meadow.pipit and other and assigned "other" to anything that isn't meadow.pipit
+# F
+cuckoos <- data.frame(cuckoos, "m.pipit" = c("TRUE","FALSE"))
+cuckoos$m.pipit[which(cuckoos$species == "meadow.pipit")] <- "TRUE"
+cuckoos$m.pipit[which(cuckoos$species != "meadow.pipit")] <- "FALSE"
+#Created a logical vector column called m.pipit which contains TRUE in rows with meadow.pipit and FALSE in the other rows.
+# G
+cuckoosMPipit <- data.frame(subset(cuckoos, cuckoos$m.pipit == TRUE))
+cuckoosOther <- data.frame(subset(cuckoos, cuckoos$m.pipit == FALSE))
+#Created two new data frames: one called cuckoosMPipit for meadow.pipit and cuckoosOther for others
+# H
+cuckoosLongLength <- subset(cuckoos, cuckoos$length > 23)
+mean(cuckoosLongLength$breadth)
+#[1] 16.78824
+#Question 1A
+library(DAAG)
+plot(area ~ elevation, data = Manitoba.lakes)
+#Almost all the lakes in Manitoba have an area below or a little above 5000
+#Except one outlier, lake Winnipeg.The area is heavily negatively skewed
+#Question 1B
+plot(area ~ elevation, data = Manitoba.lakes, xlim = c(160,260))
+text(Manitoba.lakes$elevation, Manitoba.lakes$area,
+labels = row.names(Manitoba.lakes),adj = 1.1, cex = 0.7)
+#Question 1C
+leastsq.lm <- lm(area ~ elevation, data = Manitoba.lakes)
+abline(leastsq.lm, col = "orange")
+#Question 2
+plot(height ~ age, data = Loblolly)
+abline(lm(height ~ age, data = Loblolly), col = "red")
+#Question 3
+#A straight line isn't the best way to represent Manitoba.lakes data as it
+#means nothing and shows no relation between the lakes. However, for Loblolly
+#data, a straight line makes sense because as the age increases so does the
+#height of the trees. This is shown by the best-fit line with a positive slope
+#Question 4
+seed <- unique(Loblolly$Seed)
+n <- length(seed)
+slopes <- numeric(n)
+intercepts <- numeric(n)
+for (i in 1:n) {
+lob.lm <- lm(height ~ age, data = subset(Loblolly, Seed==seed[i]))
+slopes[i] <- coef(lob.lm)[2]
+intercepts[i] <- coef(lob.lm)[1]
+}
+#My legend was not displaying correctly so I had to use this:
+windows(20,20)
+plot(height ~ age, data = Loblolly, cex = 0.75, col = 1:14, pch = rep(c(1,16), each = 7))
+for(i in 1:n) {
+if(i>=7) abline(intercepts[i],slopes[i], lty = 1, col = i)
+else abline(intercepts[i],slopes[i], lty = 2, col = i)
+}
+legend("topleft", legend = paste("Best Fit for Seed", 1:n), bty = n,
+lty = rep(1:2,each = 7), col = 1:14, cex = 0.7)
+legend("bottomright", legend = paste("Seed", 1:n), bty = n,
+pch = rep(c(1,16),each = 7), col = 1:14, cex = 0.7)
+#Question 5
+par(mfrow=c(1,2))
+hist(slopes, col = "darkblue")
+hist(intercepts, col = "darkred")
+#Question 6
+par(mfrow=c(1,1))
+plot(slopes ~ intercepts, pch = 16, col = "violet")
+abline(lm(slopes ~ intercepts), col = "blue")
+coef(lm(slopes ~ intercepts))
+#(Intercept)  intercepts
+#2.596354997 0.004443651
+#A typical line relating height to age in all tree kinds, it would have a
+#slope of 2.596354997 and an intercept of 0.004443651
+#As a check:
+par(mfrow=c(1,2))
+plot(height ~ age, data = Loblolly)
+abline(0.004443651,2.596354997)
+plot(height ~ age, data = Loblolly)
+abline(intercepts, slopes)
+#The two lines are very similar
